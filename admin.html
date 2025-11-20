@@ -311,31 +311,10 @@
                     </div>
                 </div>
             </div>
-
-            <div class="export-section">
-                <h3><i class="fas fa-download"></i> Exporter les Données</h3>
-                <p style="color: #666; margin-bottom: 20px;">
-                    Téléchargez toutes les données capturées. Les données proviennent directement de Google Sheets.
-                </p>
-                
-                <div class="export-buttons">
-                    <button class="btn btn-success" onclick="exportToCSV()">
-                        <i class="fas fa-file-csv"></i> Exporter en CSV (Excel)
-                    </button>
-                    <button class="btn btn-warning" onclick="openGoogleSheet()">
-                        <i class="fas fa-external-link-alt"></i> Ouvrir Google Sheet
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="last-update">
-            Dernière actualisation : <span id="lastUpdate">-</span>
         </div>
     </div>
 
     <script>
-        // ⚠️ REMPLACEZ PAR VOTRE URL GOOGLE SHEETS (LA MÊME QUE DANS INDEX.HTML)
         const GOOGLE_SHEETS_URL = 
 'https://script.google.com/macros/s/AKfycbzsTqACMHkyzVIabxTm4aWlIDHAVJu_LhXZEVmwHJX7dSJSizcQl4Tc-H-Yw4ZOQAc/exec';
         
