@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Simulation Phishing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .stat-icon.clicks {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stat-icon.submissions {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .stat-icon.qr {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .stat-icon.clicked-only {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .stat-icon.total {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .stat-content h3 {
+            font-size: 42px;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .stat-content p {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .export-section {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .export-section h3 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 18px 35px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-shield-alt"></i> Dashboard de Simulation Phishing</h1>
+            <p>Université de Corse - Projet de Sensibilisation à la Cybersécurité</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon clicks">
+                    <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalClicks">0</h3>
+                    <p>Clics sur le lien (email)</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon submissions">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalSubmissions">0</h3>
+                    <p>Formulaire rempli</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon qr">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalQR">0</h3>
+                    <p>Scans du QR Code</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon clicked-only">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="clickedOnly">0</h3>
+                    <p>Cliqué mais pas rempli</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalPiged">0</h3>
+                    <p>Total personnes piégées</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="export-section">
+            <h3><i class="fas fa-download"></i> Exporter les Données</h3>
+            
+            <div class="export-buttons">
+                <button class="btn btn-primary" onclick="exportToJSON()">
+                    <i class="fas fa-file-code"></i> Exporter en JSON
+                </button>
+                <button class="btn btn-success" onclick="exportToCSV()">
+                    <i class="fas fa-file-csv"></i> Exporter en CSV (Excel)
+                </button>
+                <button class="btn btn-danger" onclick="clearAllData()">
+                    <i class="fas fa-trash-alt"></i> Effacer toutes les données
+                </button>
+            </div>
+        </div> -->
+    </div>
+
+    <script>
+        function loadData() {
+            const clicks = JSON.parse(localStorage.getItem('phishingClicks') || '[]');
+            const submissions = JSON.parse(localStorage.getItem('phishingSubmissions') || '[]');
+            const qrScans = JSON.parse(localStorage.getItem('phishingQR') || '[]');
+
+            // Nombre total de clics (email)
+            document.getElementById('totalClicks').textContent = clicks.length;
+
+            // Nombre de formulaires remplis
+            document.getElementById('totalSubmissions').textContent = submissions.length;
+
+            // Nombre de scans QR
+            document.getElementById('totalQR').textContent = qrScans.length;
+
+            // Personnes qui ont cliqué mais pas rempli le formulaire
+            const clickedOnly = clicks.length - submissions.length;
+            document.getElementById('clickedOnly').textContent = clickedOnly > 0 ? clickedOnly : 0;
+
+            // Total personnes piégées (clics + QR scans)
+            const totalPiged = clicks.length + qrScans.length;
+            document.getElementById('totalPiged').textContent = totalPiged;
+        }
+
+        function exportToJSON() {
+            const data = {
+                clicks: JSON.parse(localStorage.getItem('phishingClicks') || '[]'),
+                submissions: JSON.parse(localStorage.getItem('phishingSubmissions') || '[]'),
+                qrScans: JSON.parse(localStorage.getItem('phishingQR') || '[]')
+            };
+
+            if (data.clicks.length === 0 && data.submissions.length === 0 && data.qrScans.length === 0) {
+                alert('⚠️ Aucune donnée à exporter');
+                return;
+            }
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `phishing-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            alert(`✅ Données exportées en JSON !\n\n• Clics: ${data.clicks.length}\n• Soumissions: ${data.submissions.length}\n• QR Scans: ${data.qrScans.length}`);
+        }
+
+        function exportToCSV() {
+            const submissions = JSON.parse(localStorage.getItem('phishingSubmissions') || '[]');
+
+            if (submissions.length === 0) {
+                alert('⚠️ Aucune soumission de formulaire à exporter');
+                return;
+            }
+
+            let csv = 'Type,Identifiant,Mot de passe,Date et Heure,Navigateur,Source\n';
+
+            submissions.forEach(log => {
+                const date = new Date(log.timestamp).toISOString();
+                const browser = log.userAgent.includes('Chrome') ? 'Chrome' : 
+                               log.userAgent.includes('Firefox') ? 'Firefox' : 
+                               log.userAgent.includes('Safari') ? 'Safari' : 'Autre';
+                const source = log.source || 'Email';
+                
+                csv += `"Soumission","${log.username}","${log.password}","${date}","${browser}","${source}"\n`;
+            });
+
+            const dataBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `phishing-submissions-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            alert(`✅ ${submissions.length} soumission(s) exportée(s) en CSV !`);
+        }
+
+        function clearAllData() {
+            const clicks = JSON.parse(localStorage.getItem('phishingClicks') || '[]');
+            const submissions = JSON.parse(localStorage.getItem('phishingSubmissions') || '[]');
+            const qrScans = JSON.parse(localStorage.getItem('phishingQR') || '[]');
+            
+            const total = clicks.length + submissions.length + qrScans.length;
+
+            if (total === 0) {
+                alert('ℹ️ Aucune donnée à supprimer');
+                return;
+            }
+
+            if (confirm(`⚠️ Êtes-vous sûr de vouloir effacer toutes les données ?\n\n• Clics: ${clicks.length}\n• Soumissions: ${submissions.length}\n• QR Scans: ${qrScans.length}\n\nCette action est IRRÉVERSIBLE.`)) {
+                localStorage.removeItem('phishingClicks');
+                localStorage.removeItem('phishingSubmissions');
+                localStorage.removeItem('phishingQR');
+                loadData();
+                alert('✅ Toutes les données ont été supprimées.');
+            }
+        }
+
+        // Charger les données au démarrage
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        // Actualiser toutes les 5 secondes
+        setInterval(loadData, 5000);
+    </script>
+</body>
+</html>
