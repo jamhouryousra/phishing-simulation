@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Google Sheets</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #667eea;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            margin: 50px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .stat-icon.clicks {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stat-icon.submissions {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .stat-icon.qr {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .stat-icon.clicked-only {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .stat-icon.total {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .stat-content h3 {
+            font-size: 42px;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .stat-content p {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .export-section {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .export-section h3 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 18px 35px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .error-message {
+            background: #ff5252;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .last-update {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-shield-alt"></i> Dashboard de Simulation Phishing</h1>
+                <p>Université de Corse - Données depuis Google Sheets</p>
+            </div>
+            <button class="refresh-btn" onclick="loadData()">
+                <i class="fas fa-sync-alt"></i> Actualiser
+            </button>
+        </div>
+
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin" style="font-size: 40px;"></i>
+            <p>Chargement des données depuis Google Sheets...</p>
+        </div>
+
+        <div id="error" style="display: none;"></div>
+
+        <div id="stats" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon clicks">
+                        <i class="fas fa-mouse-pointer"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalClicks">0</h3>
+                        <p>Clics sur le lien (email)</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon submissions">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalSubmissions">0</h3>
+                        <p>Formulaire rempli</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon qr">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalQR">0</h3>
+                        <p>Scans du QR Code</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon clicked-only">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="clickedOnly">0</h3>
+                        <p>Cliqué mais pas rempli</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalPiged">0</h3>
+                        <p>Total personnes piégées</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="export-section">
+                <h3><i class="fas fa-download"></i> Exporter les Données</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Téléchargez toutes les données capturées. Les données proviennent directement de Google Sheets.
+                </p>
+                
+                <div class="export-buttons">
+                    <button class="btn btn-success" onclick="exportToCSV()">
+                        <i class="fas fa-file-csv"></i> Exporter en CSV (Excel)
+                    </button>
+                    <button class="btn btn-warning" onclick="openGoogleSheet()">
+                        <i class="fas fa-external-link-alt"></i> Ouvrir Google Sheet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="last-update">
+            Dernière actualisation : <span id="lastUpdate">-</span>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ REMPLACEZ PAR VOTRE URL GOOGLE SHEETS (LA MÊME QUE DANS INDEX.HTML)
+        const GOOGLE_SHEETS_URL = 
+'https://script.google.com/macros/s/AKfycbzsTqACMHkyzVIabxTm4aWlIDHAVJu_LhXZEVmwHJX7dSJSizcQl4Tc-H-Yw4ZOQAc/exec';
+        
+        let allData = [];
+
+        async function loadData() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('stats').style.display = 'none';
+                document.getElementById('error').style.display = 'none';
+
+                const response = await fetch(GOOGLE_SHEETS_URL);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    allData = result.data;
+                    displayStats(allData);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('stats').style.display = 'block';
+                    
+                    // Mettre à jour l'heure
+                    const now = new Date();
+                    document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('fr-FR');
+                } else {
+                    throw new Error(result.message || 'Erreur inconnue');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').className = 'error-message';
+                document.getElementById('error').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Erreur de chargement</strong><br>
+                    ${error.message}<br><br>
+                    <small>Vérifiez que l'URL Google Sheets est correcte dans le code.</small>
+                `;
+            }
+        }
+
+        function displayStats(data) {
+            // Compter par type
+            const emailClicks = data.filter(row => row.Type === 'email_click').length;
+            const qrScans = data.filter(row => row.Type === 'qr_scan').length;
+            const submissions = data.filter(row => row.Type === 'form_submission').length;
+            
+            // Calculer "cliqué mais pas rempli"
+            const clickedOnly = emailClicks - submissions;
+            
+            // Total piégé
+            const totalPiged = emailClicks + qrScans;
+
+            // Afficher
+            document.getElementById('totalClicks').textContent = emailClicks;
+            document.getElementById('totalQR').textContent = qrScans;
+            document.getElementById('totalSubmissions').textContent = submissions;
+            document.getElementById('clickedOnly').textContent = clickedOnly > 0 ? clickedOnly : 0;
+            document.getElementById('totalPiged').textContent = totalPiged;
+        }
+
+        function exportToCSV() {
+            if (allData.length === 0) {
+                alert('⚠️ Aucune donnée à exporter. Actualisez d\'abord les données.');
+                return;
+            }
+
+            // Créer le CSV
+            let csv = 'Type,Identifiant,Mot de passe,Date et Heure,Navigateur,Source\n';
+            
+            allData.forEach(row => {
+                const type = row.Type || '';
+                const username = row.Username || '';
+                const password = row.Password || '';
+                const timestamp = row.Timestamp || '';
+                const userAgent = row.UserAgent || '';
+                const source = row.Source || '';
+                
+                csv += `"${type}","${username}","${password}","${timestamp}","${userAgent}","${source}"\n`;
+            });
+
+            // Télécharger
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `phishing-data-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            alert(`✅ ${allData.length} entrée(s) exportée(s) en CSV !`);
+        }
+
+        function openGoogleSheet() {
+            // Extraire l'ID du Sheet depuis l'URL du script
+            const scriptId = GOOGLE_SHEETS_URL.match(/\/s\/(.+?)\/exec/);
+            if (scriptId) {
+                alert('💡 Pour ouvrir le Google Sheet :\n\n1. Allez dans Apps Script\n2. Cliquez sur "Projet" en haut\n3. Le Sheet sera accessible depuis là\n\nOu cherchez "Phishing Simulation Data" dans Google Sheets');
+            } else {
+                alert('⚠️ Impossible d\'extraire l\'URL du Sheet');
+            }
+        }
+
+        // Charger au démarrage
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        // Auto-refresh toutes les 30 secondes
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
