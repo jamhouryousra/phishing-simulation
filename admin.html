@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - Google Sheets</title>
+    <title>Dashboard Admin - Accès Protégé</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -22,6 +22,118 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
+        }
+
+        /* LOGIN SCREEN */
+        .login-container {
+            max-width: 450px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header i {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .error-message {
+            background: #ff5252;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* DASHBOARD (hidden by default) */
+        #dashboard {
+            display: none;
         }
 
         .header {
@@ -46,11 +158,14 @@
             font-size: 16px;
         }
 
-        .refresh-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
             padding: 12px 25px;
+            border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
@@ -61,7 +176,17 @@
             transition: all 0.3s;
         }
 
-        .refresh-btn:hover {
+        .btn-refresh {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
@@ -144,15 +269,6 @@
             font-weight: 500;
         }
 
-        .error-message {
-            background: #ff5252;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
         .last-update {
             text-align: center;
             color: white;
@@ -170,98 +286,223 @@
                 flex-direction: column;
                 gap: 20px;
             }
+
+            .header-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1><i class="fas fa-shield-alt"></i> Dashboard de Simulation Phishing</h1>
-                <p>Université de Corse - Données depuis Google Sheets</p>
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-header">
+            <i class="fas fa-shield-alt"></i>
+            <h1>Accès Administrateur</h1>
+            <p>Entrez le mot de passe pour accéder au dashboard</p>
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            <i class="fas fa-exclamation-triangle"></i> Mot de passe incorrect
+        </div>
+
+        <form id="loginForm" onsubmit="return checkPassword(event);">
+            <div class="input-group">
+                <label for="password">Mot de passe</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="input-field" 
+                        placeholder="Entrez le mot de passe"
+                        required
+                        autocomplete="off"
+                    >
+                    <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility()"></i>
+                </div>
             </div>
-            <button class="refresh-btn" onclick="loadData()">
-                <i class="fas fa-sync-alt"></i> Actualiser
+
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
             </button>
+        </form>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+            <p style="color: #999; font-size: 12px;">
+                <i class="fas fa-info-circle"></i> Contactez l'administrateur si vous avez perdu le mot de passe
+            </p>
         </div>
+    </div>
 
-        <div id="loading" class="loading">
-            <i class="fas fa-spinner fa-spin" style="font-size: 40px;"></i>
-            <p>Chargement des données depuis Google Sheets...</p>
-        </div>
-
-        <div id="error" style="display: none;"></div>
-
-        <div id="stats" style="display: none;">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon clicks">
-                        <i class="fas fa-mouse-pointer"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="totalClicks">0</h3>
-                        <p>Clics sur le lien (email)</p>
-                    </div>
+    <!-- DASHBOARD (hidden by default) -->
+    <div id="dashboard">
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1><i class="fas fa-shield-alt"></i> Dashboard de Simulation Phishing</h1>
+                    <p>Université de Corse - Données depuis Google Sheets</p>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon submissions">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="totalSubmissions">0</h3>
-                        <p>Formulaire rempli</p>
-                    </div>
+                <div class="header-buttons">
+                    <button class="btn btn-refresh" onclick="loadData()">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </button>
+                    <button class="btn btn-logout" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </button>
                 </div>
+            </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon qr">
-                        <i class="fas fa-qrcode"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 id="totalQR">0</h3>
-                        <p>Scans du QR Code</p>
-                    </div>
-                </div>
+            <div id="loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 40px;"></i>
+                <p>Chargement des données depuis Google Sheets...</p>
+            </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon clicked-only">
-                        <i class="fas fa-user-times"></i>
+            <div id="stats" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon clicks">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalClicks">0</h3>
+                            <p>Clics sur le lien (email)</p>
+                        </div>
                     </div>
-                    <div class="stat-content">
-                        <h3 id="clickedOnly">0</h3>
-                        <p>Cliqué mais pas rempli</p>
-                    </div>
-                </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon total">
-                        <i class="fas fa-users"></i>
+                    <div class="stat-card">
+                        <div class="stat-icon submissions">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalSubmissions">0</h3>
+                            <p>Formulaire rempli</p>
+                        </div>
                     </div>
-                    <div class="stat-content">
-                        <h3 id="totalPiged">0</h3>
-                        <p>Total personnes piégées</p>
+
+                    <div class="stat-card">
+                        <div class="stat-icon qr">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalQR">0</h3>
+                            <p>Scans du QR Code</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon clicked-only">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="clickedOnly">0</h3>
+                            <p>Cliqué mais pas rempli</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalPiged">0</h3>
+                            <p>Total personnes piégées</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="last-update">
-            Dernière actualisation : <span id="lastUpdate">-</span>
+            <div class="last-update">
+                Dernière actualisation : <span id="lastUpdate">-</span>
+            </div>
         </div>
     </div>
 
     <script>
+        // ⚠️ CONFIGURATION
+        const ADMIN_PASSWORD = '123456'; 
         const GOOGLE_SHEETS_URL = 
             'https://script.google.com/macros/s/AKfycbzsTqACMHkyzVIabxTm4aWlIDHAVJu_LhXZEVmwHJX7dSJSizcQl4Tc-H-Yw4ZOQAc/exec';;
         
         let allData = [];
 
+        // Check if already logged in
+        window.addEventListener('load', function() {
+            const isLoggedIn = sessionStorage.getItem('adminLoggedIn');
+            if (isLoggedIn === 'true') {
+                showDashboard();
+                loadData();
+            }
+        });
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.querySelector('.password-toggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function checkPassword(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (password === ADMIN_PASSWORD) {
+                // Correct password
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                errorMessage.classList.remove('show');
+                showDashboard();
+                loadData();
+            } else {
+                // Wrong password
+                errorMessage.classList.add('show');
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+                
+                // Shake animation
+                errorMessage.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    errorMessage.style.animation = '';
+                }, 500);
+            }
+            
+            return false;
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                sessionStorage.removeItem('adminLoggedIn');
+                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('password').value = '';
+                document.getElementById('stats').style.display = 'none';
+            }
+        }
+
         async function loadData() {
             try {
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('stats').style.display = 'none';
-                document.getElementById('error').style.display = 'none';
 
                 const response = await fetch(GOOGLE_SHEETS_URL);
                 const result = await response.json();
@@ -280,14 +521,7 @@
             } catch (error) {
                 console.error('Erreur:', error);
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').className = 'error-message';
-                document.getElementById('error').innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Erreur de chargement</strong><br>
-                    ${error.message}<br><br>
-                    <small>Vérifiez que l'URL Google Sheets est correcte dans le code.</small>
-                `;
+                alert('Erreur de chargement des données. Vérifiez votre connexion et l\'URL Google Sheets.');
             }
         }
 
@@ -305,8 +539,23 @@
             document.getElementById('totalPiged').textContent = totalPiged;
         }
 
-        document.addEventListener('DOMContentLoaded', loadData);
-        setInterval(loadData, 30000);
+        // Auto-refresh every 30 seconds (only when logged in)
+        setInterval(function() {
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                loadData();
+            }
+        }, 30000);
+
+        // Add shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
